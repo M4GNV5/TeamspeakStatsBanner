@@ -8,7 +8,6 @@ do
 		echo -n " " >> data
 		top -bn1 | grep load | awk '{printf "%f", $(NF-2)}' >> data
 		echo "" >> data
-		echo $i
 		sleep 1
 	done
 
@@ -25,7 +24,6 @@ do
 	uptime > uptime
 
 	../PointerScript/bin/ptrs render.ptrs
-	exit 1
 
 	echo "" > data
 done

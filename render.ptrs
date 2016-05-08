@@ -6,8 +6,8 @@ import "cairo_image_surface_create", "cairo_create", "cairo_surface_write_to_png
 	"cairo_select_font_face", "cairo_set_font_size", "cairo_show_text",
 	"cairo_stroke", "cairo_fill" from "libcairo.so.2";
 
-var imageWidth = 1000;
-var imageHeight = 460;
+var imageWidth = 930;
+var imageHeight = 240;
 
 var memData[VARSIZE * 60];
 var cpuData[VARSIZE * 60];
@@ -24,7 +24,6 @@ for(var i = 0; i < 60; i++)
 	}
 	memData[i] = mem;
 	cpuData[i] = cpu;
-	printf("%g %g\n", mem, cpu);
 }
 fclose(fd);
 
@@ -63,7 +62,7 @@ fclose(fd);
 var surface = cairo_image_surface_create(0, imageWidth, imageHeight);
 var cr = cairo_create(surface);
 cairo_select_font_face(cr, "Helvetica", 0, 1);
-cairo_set_font_size(cr, 20.0);
+cairo_set_font_size(cr, 15.0);
 cairo_set_line_width(cr, 3.0);
 
 
@@ -74,27 +73,27 @@ function plotData(title, data, color, startX, startY)
 	startY = (float)startY;
 
 	cairo_set_source_rgb(cr, (float)color[0], (float)color[1], (float)color[2]);
-	cairo_move_to(cr, startX, startY + 2 * (100 - data[0]));
+	cairo_move_to(cr, startX, startY + (100 - data[0]));
 
 	for(var i = 1; i < dataCount; i++)
 	{
-		cairo_line_to(cr, startX + i * 200.0 / dataCount, startY + 2 * (100 - data[i]));
+		cairo_line_to(cr, startX + i * 100.0 / dataCount, startY + (100 - data[i]));
 	}
 	cairo_stroke(cr);
 
 	cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
 
-	cairo_move_to(cr, startX + 10, startY + 20);
+	cairo_move_to(cr, startX + 5, startY + 15);
 	cairo_show_text(cr, title);
 
 	cairo_move_to(cr, startX, startY);
-	cairo_rel_line_to(cr, 0.0, 200.0);
-	cairo_rel_line_to(cr, 200.0, 0.0);
+	cairo_rel_line_to(cr, 0.0, 100.0);
+	cairo_rel_line_to(cr, 100.0, 0.0);
 	cairo_stroke(cr);
 }
 
-plotData("CPU Usage", cpuData, [0, 0, 1], 10, 10);
-plotData("Memory Usage", memData, [0, 0.9, 0], 10, 240);
+plotData("CPU Usage", cpuData, [0, 0, 1], 5, 5);
+plotData("Memory Usage", memData, [0, 0.9, 0], 5, 130);
 
 
 
@@ -122,7 +121,7 @@ function printStr(startX, endX, str)
 
 		if(str[i] == ' ' && x >= endX)
 		{
-			cairo_move_to(cr, startX, y + 20);
+			cairo_move_to(cr, startX, y + 12);
 		}
 	}
 
@@ -130,20 +129,20 @@ function printStr(startX, endX, str)
 	return y;
 }
 
-var nextY = 30.0;
+var nextY = 17.0;
 for(var i = 0; i < 3; i++)
 {
 	cairo_select_font_face(cr, "Helvetica", 0, 1);
-	cairo_move_to(cr, 220.0, nextY);
-	nextY = 25 + printStr(220.0, 900, newsTitle[i] + 1);
+	cairo_move_to(cr, 130.0, nextY);
+	nextY = 15 + printStr(130.0, 850, newsTitle[i] + 1);
 
 	cairo_select_font_face(cr, "Helvetica", 0, 0);
-	cairo_move_to(cr, 220.0, nextY);
-	nextY = 40 + printStr(220.0, 900, newsSubtitle[i] + 1);
+	cairo_move_to(cr, 130.0, nextY);
+	nextY = 30 + printStr(130.0, 850, newsSubtitle[i] + 1);
 }
 
 cairo_select_font_face(cr, "Helvetica", 0, 1);
-cairo_move_to(cr, 220.0, imageHeight - 25.0);
+cairo_move_to(cr, 130.0, imageHeight - 15.0);
 cairo_show_text(cr, uptime);
 
 cairo_surface_write_to_png(surface, "banner.png");
