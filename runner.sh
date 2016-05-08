@@ -2,13 +2,9 @@
 
 while true
 do
-	for i in {1..30}
-	do
-		free -m | awk 'NR==2{printf "%f", $3*100/$2}' >> data
-		echo -n " " >> data
-		top -bn2 | grep %Cpu | tail -1 | awk '{printf "%f", $2}' >> data
-		echo "" >> data
-	done
+	./collectData.sh &
+	sleep 60
+	kill $!
 
 	echo -n "" > news
 	curl -H "X-Authorization: YOUR-KEY-HERE" http://api.zeit.de/content\?limit\=3 > rawnews
