@@ -11,27 +11,28 @@ var imageHeight = 240;
 
 var memData[VARSIZE * 60];
 var cpuData[VARSIZE * 60];
-var fd = fopen("data", "r");
-var dataCount;
-for(var i = 0; i < 60; i++)
+
+function readDataFile(buff, file)
 {
-	var mem = 0.0;
-	var cpu = 0.0;
-	if(fscanf(fd, "%lf %lf", &mem, &cpu) != 2)
+	var fd = fopen(file, "r");
+	for(var i = 0; i < 60; i++)
 	{
-		dataCount = i;
-		break;
+		var val = 0.0;
+		if(fscanf(fd, "%lf", &val) != 1)
+			return i;
+
+		buff[i] = val;
 	}
-	memData[i] = mem;
-	cpuData[i] = cpu;
+	fclose(fd);
 }
-fclose(fd);
+var memDataCount = readDataFile(memData, "data/mem.dat");
+var cpuDataCount = readDataFile(cpuData, "data/cpu.dat");
 
 
 
 var newsTitle[VARSIZE * 3];
 var newsSubtitle[VARSIZE * 3];
-fd = fopen("news", "r");
+var fd = fopen("data/news.dat", "r");
 for(var i = 0; i < 3; i++)
 {
 	var ptr;
@@ -51,7 +52,7 @@ fclose(fd);
 
 
 var uptime = malloc(256);
-fd = fopen("uptime", "r");
+fd = fopen("data/uptime.dat", "r");
 fgets(uptime, 256, fd);
 var ptr = (native)strchr(uptime, '\n');
 *ptr = 0;
@@ -67,7 +68,7 @@ cairo_set_line_width(cr, 3.0);
 
 
 
-function plotData(title, data, color, startX, startY)
+function plotData(title, data, dataCount, color, startX, startY)
 {
 	startX = (float)startX;
 	startY = (float)startY;
@@ -92,8 +93,8 @@ function plotData(title, data, color, startX, startY)
 	cairo_stroke(cr);
 }
 
-plotData("CPU", cpuData, [0, 0, 1], 5, 5);
-plotData("Memory", memData, [0, 0.9, 0], 5, 130);
+plotData("CPU", cpuData, memDataCount, [0, 0, 1], 5, 5);
+plotData("Memory", memData, cpuDataCount, [0, 0.9, 0], 5, 130);
 
 
 

@@ -6,19 +6,17 @@ do
 	sleep 60
 	kill $!
 
-	echo -n "" > news
-	curl -H "X-Authorization: YOUR-KEY-HERE" http://api.zeit.de/content\?limit\=3 > rawnews
+	echo -n "" > data/news.dat
+	curl -H "X-Authorization: YOUR-KEY-HERE" http://api.zeit.de/content\?limit\=3 > data/rawnews.dat
 
-	cat rawnews | jq '.matches | .[0].title' >> news
-	cat rawnews | jq '.matches | .[0].subtitle' >> news
-	cat rawnews | jq '.matches | .[1].title' >> news
-	cat rawnews | jq '.matches | .[1].subtitle' >> news
-	cat rawnews | jq '.matches | .[2].title' >> news
-	cat rawnews | jq '.matches | .[2].subtitle' >> news
+	cat data/rawnews.dat | jq '.matches | .[0].title' >> data/news.dat
+	cat data/rawnews.dat | jq '.matches | .[0].subtitle' >> data/news.dat
+	cat data/rawnews.dat | jq '.matches | .[1].title' >> data/news.dat
+	cat data/rawnews.dat | jq '.matches | .[1].subtitle' >> data/news.dat
+	cat data/rawnews.dat | jq '.matches | .[2].title' >> data/news.dat
+	cat data/rawnews.dat | jq '.matches | .[2].subtitle' >> data/news.dat
 
-	uptime > uptime
+	uptime > data/uptime.dat
 
 	../PointerScript/bin/ptrs render.ptrs
-
-	echo "" > data
 done
