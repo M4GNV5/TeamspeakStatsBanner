@@ -61,7 +61,7 @@ fclose(fd);
 
 var surface = cairo_image_surface_create(0, imageWidth, imageHeight);
 var cr = cairo_create(surface);
-cairo_select_font_face(cr, "Helvetica", 0, 1);
+cairo_select_font_face(cr, "sans-serif", 0, 1);
 cairo_set_font_size(cr, 15.0);
 cairo_set_line_width(cr, 3.0);
 
@@ -92,8 +92,8 @@ function plotData(title, data, color, startX, startY)
 	cairo_stroke(cr);
 }
 
-plotData("CPU Usage", cpuData, [0, 0, 1], 5, 5);
-plotData("Memory Usage", memData, [0, 0.9, 0], 5, 130);
+plotData("CPU", cpuData, [0, 0, 1], 5, 5);
+plotData("Memory", memData, [0, 0.9, 0], 5, 130);
 
 
 
@@ -132,16 +132,16 @@ function printStr(startX, endX, str)
 var nextY = 17.0;
 for(var i = 0; i < 3; i++)
 {
-	cairo_select_font_face(cr, "Helvetica", 0, 1);
+	cairo_select_font_face(cr, "sans-serif", 0, 1);
 	cairo_move_to(cr, 130.0, nextY);
 	nextY = 15 + printStr(130.0, 850, newsTitle[i] + 1);
 
-	cairo_select_font_face(cr, "Helvetica", 0, 0);
+	cairo_select_font_face(cr, "sans-serif", 0, 0);
 	cairo_move_to(cr, 130.0, nextY);
 	nextY = 30 + printStr(130.0, 850, newsSubtitle[i] + 1);
 }
 
-cairo_select_font_face(cr, "Helvetica", 0, 1);
+cairo_select_font_face(cr, "sans-serif", 0, 1);
 cairo_move_to(cr, 130.0, imageHeight - 15.0);
 cairo_show_text(cr, uptime);
 
