@@ -10,6 +10,7 @@ var imageWidth = 930;
 var imageHeight = 240;
 
 var memData[VARSIZE * 60];
+var cacheData[VARSIZE * 60];
 var cpuData[VARSIZE * 60];
 
 function readDataFile(buff, file)
@@ -26,6 +27,7 @@ function readDataFile(buff, file)
 	fclose(fd);
 }
 var memDataCount = readDataFile(memData, "data/mem.dat");
+var cacheDataCount = readDataFile(cacheData, "data/cache.dat");
 var cpuDataCount = readDataFile(cpuData, "data/cpu.dat");
 
 
@@ -95,6 +97,7 @@ function plotData(title, data, dataCount, color, startX, startY)
 
 plotData("CPU", cpuData, memDataCount, [0, 0, 1], 5, 5);
 plotData("Memory", memData, cpuDataCount, [0, 0.9, 0], 5, 130);
+plotData("", cacheData, cacheDataCount, [0.9, 0.9, 0], 5, 130);
 
 
 
@@ -110,8 +113,8 @@ function printStr(startX, endX, str)
 	for(var i = 0; i < len; i++)
 	{
 		if(str[i] < 0)
-			str[i] = '?';
-		if(str[i] == '?' && str[i - 1] == '?')
+			str[i] = '\n';
+		if(str[i] == '\n' && str[i - 1] == '\n')
 			continue;
 		if(str[i + 1] == 0)
 			break;
