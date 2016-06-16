@@ -162,10 +162,9 @@ var path = "./icons/%s.png" % weather;
 fd = fopen(path, "r");
 if(fd != NULL)
 {
-	printf("%s\n", path);
 	fclose(fd);
 	var weatherSurface = cairo_image_surface_create_from_png(path);
-	cairo_mask_surface(cr, weatherSurface, imageWidth - 55.0, 5.0);
+	cairo_mask_surface(cr, weatherSurface, imageWidth - 55.0, imageHeight - 55.0);
 }
 
 cairo_surface_write_to_png(surface, "banner.png");
