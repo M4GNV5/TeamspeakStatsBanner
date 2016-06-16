@@ -1,17 +1,17 @@
-import "printf", "malloc", "free", "strchr", "strlen", "fopen", "fscanf", "fgets", "fclose", "isalnum";
+import malloc, free, strchr, strlen, fopen, fscanf, fgets, fclose;
 
-import "cairo_image_surface_create", "cairo_create", "cairo_surface_write_to_png",
-	"cairo_set_line_width", "cairo_set_source_rgb", "cairo_move_to",
-	"cairo_line_to", "cairo_rel_line_to", "cairo_get_current_point",
-	"cairo_select_font_face", "cairo_set_font_size", "cairo_show_text",
-	"cairo_stroke", "cairo_fill" from "libcairo.so.2";
+import cairo_image_surface_create, cairo_create, cairo_surface_write_to_png,
+	cairo_set_line_width, cairo_set_source_rgb, cairo_move_to,
+	cairo_line_to, cairo_rel_line_to, cairo_get_current_point,
+	cairo_select_font_face, cairo_set_font_size, cairo_show_text,
+	cairo_stroke, cairo_fill from "libcairo.so.2";
 
 var imageWidth = 930;
 var imageHeight = 240;
 
-var memData{60};
-var cacheData{60};
-var cpuData{60};
+var memData[60];
+var cacheData[60];
+var cpuData[60];
 
 function readDataFile(buff, file)
 {
@@ -32,8 +32,8 @@ var cpuDataCount = readDataFile(cpuData, "data/cpu.dat");
 
 
 
-var newsTitle{3};
-var newsSubtitle{3};
+var newsTitle[3];
+var newsSubtitle[3];
 var fd = fopen("data/news.dat", "r");
 for(var i = 0; i < 3; i++)
 {
@@ -95,27 +95,28 @@ function plotData(title, data, dataCount, color, startX, startY)
 	cairo_stroke(cr);
 }
 
-plotData("CPU", cpuData, memDataCount, {0, 0, 0.9}, 5, 5);
-plotData("Memory", memData, cpuDataCount, {0, 0.9, 0}, 5, 130);
-plotData("", cacheData, cacheDataCount, {0.9, 0.9, 0}, 5, 130);
+plotData("CPU", cpuData, memDataCount, [0, 0, 0.9], 5, 5);
+plotData("Memory", memData, cpuDataCount, [0, 0.9, 0], 5, 130);
+plotData("", cacheData, cacheDataCount, [0.9, 0.9, 0], 5, 130);
 
 
 
 function printStr(startX, endX, str)
 {
-	var buff[2];
+	var buff{2};
 	buff[1] = 0;
 	str = cast<native>str;
 
 	var x = 0.0;
 	var y = 0.0;
 	var len = strlen(str);
-	for(var i = 0; i < len; i++)
+	var i;
+	for(i = 0; i < len; i++)
 	{
-		if(str[i] < 0)
-			str[i] = '\n';
-		if(str[i] == '\n' && str[i - 1] == '\n')
+		if(str[i - 1] == '\n')
 			continue;
+		else if(str[i] < 0)
+			str[i] = '\n';
 
 		buff[0] = str[i];
 		cairo_show_text(cr, buff);
