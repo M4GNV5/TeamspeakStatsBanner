@@ -1,9 +1,10 @@
-import malloc, free, strchr, strlen, fopen, fscanf, fgets, fclose;
+import malloc, free, strchr, strlen, fopen, fscanf, fgets, fclose, printf;
 
 import cairo_image_surface_create, cairo_create, cairo_surface_write_to_png,
 	cairo_set_line_width, cairo_set_source_rgb, cairo_move_to,
 	cairo_line_to, cairo_rel_line_to, cairo_get_current_point,
 	cairo_select_font_face, cairo_set_font_size, cairo_show_text,
+	cairo_image_surface_create_from_png, cairo_mask_surface,
 	cairo_stroke, cairo_fill from "libcairo.so.2";
 
 var imageWidth = 930;
@@ -57,6 +58,15 @@ var uptime = malloc(256);
 fd = fopen("data/uptime.dat", "r");
 fgets(uptime, 256, fd);
 var ptr = cast<native>strchr(uptime, '\n');
+*ptr = 0;
+fclose(fd);
+
+
+
+var weather = malloc(256);
+fd = fopen("data/weather.dat", "r");
+fgets(weather, 256, fd);
+ptr = cast<native>strchr(weather, '\n');
 *ptr = 0;
 fclose(fd);
 
@@ -147,5 +157,15 @@ for(var i = 0; i < 3; i++)
 cairo_select_font_face(cr, "sans-serif", 0, 1);
 cairo_move_to(cr, 130.0, imageHeight - 15.0);
 cairo_show_text(cr, uptime);
+
+var path = "./icons/%s.png" % weather;
+fd = fopen(path, "r");
+if(fd != NULL)
+{
+	printf("%s\n", path);
+	fclose(fd);
+	var weatherSurface = cairo_image_surface_create_from_png(path);
+	cairo_mask_surface(cr, weatherSurface, imageWidth - 55.0, 5.0);
+}
 
 cairo_surface_write_to_png(surface, "banner.png");

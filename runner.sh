@@ -16,6 +16,9 @@ do
 	cat data/rawnews.dat | jq -r '.matches | .[2].title' >> data/news.dat
 	cat data/rawnews.dat | jq -r '.matches | .[2].subtitle' >> data/news.dat
 
+	curl https://api.forecast.io/forecast/YOUR-KEY-HERE/YOUR-LOCATION-HERE > data/rawweather.dat
+	cat data/rawweather.dat | jq -r '.currently.icon' > data/weather.dat
+
 	echo -n "time" > data/uptime.dat
 	uptime >> data/uptime.dat
 
