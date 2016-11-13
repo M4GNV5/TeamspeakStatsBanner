@@ -21,7 +21,7 @@ function readDataFile(buff, file)
 	{
 		var val = 0.0;
 		if(fscanf(fd, "%lf", &val) != 1)
-			return i;
+			return i - 1;
 
 		buff[i] = val;
 	}
