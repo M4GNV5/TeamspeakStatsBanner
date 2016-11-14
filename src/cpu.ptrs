@@ -1,0 +1,51 @@
+import strcmp, fopen, fscanf, feof, fclose;
+
+struct CpuData
+{
+	user = 0;
+	nice = 0;
+	system = 0;
+	halt = 0;
+	iowait = 0;
+	irq = 0;
+	softirq = 0;
+
+	get total
+	{
+		return user + nice + system + halt + iowait + irq + softirq;
+	}
+	get nonidle
+	{
+		return user + nice + system + irq + softirq;
+	}
+	get idle
+	{
+		return halt + iowait;
+	}
+
+	getUsageSince(last)
+	{
+		var totalDiff = cast<float>(total - last.total);
+		var idleDiff = cast<float>(idle - last.idle);
+		return (totalDiff - idleDiff) / totalDiff;
+	}
+
+	updateData()
+	{
+		var buff{128};
+
+		var fd = fopen("/proc/stat", "r");
+		while(true)
+		{
+			var count = fscanf(fd, "%s %lld %lld %lld %lld %lld %lld %lld",
+				buff, &user, &nice, &system, &halt, &iowait, &irq, &softirq);
+
+			if(count == 8 && strcmp(buff, "cpu") == 0)
+				break;
+
+			if(feof(fd))
+				throw "Failed to read from /proc/stat";
+		}
+		fclose(fd);
+	}
+};
