@@ -1,0 +1,125 @@
+import strcmp, fopen, fscanf, feof, fclose, sleep, printf;
+
+import cairo_image_surface_create, cairo_create, cairo_surface_write_to_png,
+	cairo_surface_destroy, cairo_destroy,
+	cairo_set_line_width, cairo_set_source_rgb, cairo_move_to,
+	cairo_line_to, cairo_rel_line_to, cairo_get_current_point,
+	cairo_select_font_face, cairo_set_font_size, cairo_show_text,
+	cairo_image_surface_create_from_png, cairo_mask_surface,
+	cairo_stroke, cairo_fill from "libcairo.so.2";
+
+const IMAGE_WIDTH = 930;
+const IMAGE_HEIGHT = 240;
+const DATA_COUNT = 10;
+
+struct CpuData
+{
+	user = 0;
+	nice = 0;
+	system = 0;
+	halt = 0;
+	iowait = 0;
+	irq = 0;
+	softirq = 0;
+
+	get total
+	{
+		return user + nice + system + halt + iowait + irq + softirq;
+	}
+	get nonidle
+	{
+		return user + nice + system + irq + softirq;
+	}
+	get idle
+	{
+		return halt + iowait;
+	}
+
+	getUsageSince(last)
+	{
+		var totalDiff = cast<float>(total - last.total);
+		var idleDiff = cast<float>(idle - last.idle);
+		return (totalDiff - idleDiff) / totalDiff;
+	}
+
+	updateData()
+	{
+		var buff{128};
+
+		var fd = fopen("/proc/stat", "r");
+		while(true)
+		{
+			var count = fscanf(fd, "%s %lld %lld %lld %lld %lld %lld %lld",
+				buff, &user, &nice, &system, &halt, &iowait, &irq, &softirq);
+
+			if(count == 8 && strcmp(buff, "cpu") == 0)
+				break;
+
+			if(feof(fd))
+				throw "Failed to read from /proc/stat";
+		}
+		fclose(fd);
+	}
+};
+
+var cr;
+var surface;
+
+var cpuData[DATA_COUNT];
+var cpuPercentages[DATA_COUNT];
+for(var i = 0; i < DATA_COUNT; i++)
+	cpuData[i] = new CpuData();
+
+function plotData(title, data, dataCount, color, startX, startY)
+{
+	startX = cast<float>startX;
+	startY = cast<float>startY;
+
+	cairo_set_source_rgb(cr, cast<float>color[0], cast<float>color[1], cast<float>color[2]);
+
+	for(var i = 1; i < dataCount; i++)
+	{
+		cairo_line_to(cr, startX + i * 100f / dataCount, startY + (100f - data[i]));
+	}
+	cairo_stroke(cr);
+
+	cairo_set_source_rgb(cr, 0f, 0f, 0f);
+
+	cairo_move_to(cr, startX + 5, startY + 15);
+	cairo_show_text(cr, title);
+
+	cairo_move_to(cr, startX, startY);
+	cairo_rel_line_to(cr, 0f, 100f);
+	cairo_rel_line_to(cr, 100f, 0f);
+	cairo_stroke(cr);
+}
+
+var i = 0;
+while(true)
+{
+	cpuData[i].updateData();
+
+	if(++i >= DATA_COUNT)
+	{
+		surface = cairo_image_surface_create(0, IMAGE_WIDTH, IMAGE_HEIGHT);
+		cr = cairo_create(surface);
+		cairo_select_font_face(cr, "sans-serif", 0, 1);
+		cairo_set_font_size(cr, 15.0);
+		cairo_set_line_width(cr, 3.0);
+
+
+
+		for(var i = 1; i < DATA_COUNT; i++)
+			cpuPercentages[i] = cpuData[i].getUsageSince(cpuData[i - 1]) * 100;
+		plotData("CPU", cpuPercentages, DATA_COUNT, [0, 0, 0.9], 5, 5);
+
+
+
+		cairo_surface_write_to_png(surface, "banner.png");
+		cairo_destroy(cr);
+		cairo_surface_destroy(surface);
+		i = 0;
+	}
+
+	sleep(1);
+}
