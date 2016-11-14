@@ -1,4 +1,4 @@
-import sleep, printf;
+import sleep, popen, fgets, pclose, strchr, printf;
 import CpuData from "./cpu.ptrs";
 import MemData from "./mem.ptrs";
 
@@ -17,6 +17,7 @@ const DATA_COUNT = 10;
 var cr;
 var surface;
 var plotData[DATA_COUNT];
+var uptime{1024};
 
 var cpuData[DATA_COUNT];
 for(var i = 0; i < DATA_COUNT; i++)
@@ -79,7 +80,18 @@ while(true)
 		plot("", [0.9, 0.9, 0], 5, 130);
 
 
-		cairo_surface_write_to_png(surface, "../banner.png");
+
+		var proc = popen("uptime", "r");
+		fgets(uptime, 1024, proc);
+		pclose(proc);
+		*as<native>strchr(uptime, '\n') = 0;
+		cairo_select_font_face(cr, "sans-serif", 0, 1);
+		cairo_move_to(cr, 130.0, IMAGE_HEIGHT - 15.0);
+		cairo_show_text(cr, uptime);
+
+
+
+		cairo_surface_write_to_png(surface, "banner.png");
 		cairo_destroy(cr);
 		cairo_surface_destroy(surface);
 		i = 0;
