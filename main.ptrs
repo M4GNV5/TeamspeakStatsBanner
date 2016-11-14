@@ -101,7 +101,7 @@ struct MemData
 
 var cr;
 var surface;
-var currPlotData[DATA_COUNT];
+var plotData[DATA_COUNT];
 
 var cpuData[DATA_COUNT];
 for(var i = 0; i < DATA_COUNT; i++)
@@ -111,17 +111,16 @@ var memData[DATA_COUNT];
 for(var i = 0; i < DATA_COUNT; i++)
 	memData[i] = new MemData();
 
-function plotData(title, data, dataCount, color, startX, startY)
+function plot(title, color, startX, startY)
 {
 	startX = cast<float>startX;
 	startY = cast<float>startY;
 
 	cairo_set_source_rgb(cr, cast<float>color[0], cast<float>color[1], cast<float>color[2]);
 
-	for(var i = 1; i < dataCount; i++)
+	for(var i = 1; i < DATA_COUNT; i++)
 	{
-		printf("%s data[%d] = %g\n", title, i, data[i]);
-		cairo_line_to(cr, startX + i * 100f / dataCount, startY + (100f - data[i]));
+		cairo_line_to(cr, startX + i * 100f / DATA_COUNT, startY + (100f - plotData[i]));
 	}
 	cairo_stroke(cr);
 
@@ -153,16 +152,16 @@ while(true)
 
 
 		for(var i = 1; i < DATA_COUNT; i++)
-			currPlotData[i] = cpuData[i].getUsageSince(cpuData[i - 1]) * 100;
-		plotData("CPU", currPlotData, DATA_COUNT, [0, 0, 0.9], 5, 5);
+			plotData[i] = cpuData[i].getUsageSince(cpuData[i - 1]) * 100;
+		plot("CPU", [0, 0, 0.9], 5, 5);
 
 		for(var i = 1; i < DATA_COUNT; i++)
-			currPlotData[i] = 100 - memData[i].available * 100f / memData[i].total;
-		plotData("MEM", currPlotData, DATA_COUNT, [0, 0.9, 0], 5, 130);
+			plotData[i] = 100 - memData[i].available * 100f / memData[i].total;
+		plot("MEM", [0, 0.9, 0], 5, 130);
 
 		for(var i = 1; i < DATA_COUNT; i++)
-			currPlotData[i] = 100 - memData[i].free * 100f / memData[i].total;
-		plotData("", currPlotData, DATA_COUNT, [0.9, 0.9, 0], 5, 130);
+			plotData[i] = 100 - memData[i].free * 100f / memData[i].total;
+		plot("", [0.9, 0.9, 0], 5, 130);
 
 
 		cairo_surface_write_to_png(surface, "banner.png");
