@@ -1,18 +1,18 @@
 import sleep, popen, fgets, pclose, strchr, printf;
+import cairo_* from "libcairo.so.2";
+import g_object_unref, pango_* from "libpangocairo-1.0.so";
 import CpuData from "./cpu.ptrs";
 import MemData from "./mem.ptrs";
-
-import cairo_image_surface_create, cairo_create, cairo_surface_write_to_png,
-	cairo_surface_destroy, cairo_destroy,
-	cairo_set_line_width, cairo_set_source_rgb, cairo_move_to,
-	cairo_line_to, cairo_rel_line_to, cairo_get_current_point,
-	cairo_select_font_face, cairo_set_font_size, cairo_show_text,
-	cairo_image_surface_create_from_png, cairo_mask_surface,
-	cairo_stroke, cairo_fill from "libcairo.so.2";
+import ZeitNews from "./zeit.ptrs";
 
 const IMAGE_WIDTH = 930;
 const IMAGE_HEIGHT = 240;
-const DATA_COUNT = 10;
+const DATA_COUNT = 60;
+const NEWS_REFRESH = 5;
+const FONT_GRAPH = "sans-serif";
+const FONT_UPTIME = "sans-serif";
+const FONT_NEWS_TITLE = "sans-serif bold 12";
+const FONT_NEWS = "sans-serif 12";
 
 var cr;
 var surface;
@@ -30,6 +30,11 @@ for(var i = 0; i < DATA_COUNT; i++)
 var memData[DATA_COUNT];
 for(var i = 0; i < DATA_COUNT; i++)
 	memData[i] = new MemData();
+
+var titleFont = pango_font_description_from_string(FONT_NEWS_TITLE);
+var textFont = pango_font_description_from_string(FONT_NEWS);
+var news = new ZeitNews();
+news.updateData();
 
 function plot(title, color, startX, startY)
 {
@@ -56,6 +61,7 @@ function plot(title, color, startX, startY)
 }
 
 var i = 0;
+var j = 0;
 while(true)
 {
 	cpuData[i].updateData();
@@ -65,23 +71,58 @@ while(true)
 	{
 		surface = cairo_image_surface_create(0, IMAGE_WIDTH, IMAGE_HEIGHT);
 		cr = cairo_create(surface);
-		cairo_select_font_face(cr, "sans-serif", 0, 1);
-		cairo_set_font_size(cr, 15.0);
-		cairo_set_line_width(cr, 3.0);
+		cairo_select_font_face(cr, FONT_GRAPH, 0, 1);
+		cairo_set_font_size(cr, 15f);
+		cairo_set_line_width(cr, 3f);
 
 
 
 		for(var i = 1; i < DATA_COUNT; i++)
 			plotData[i] = cpuData[i].getUsageSince(cpuData[i - 1]) * 100;
-		scoped plot("CPU", cpuColor, 5, 5);
+		plot("CPU", cpuColor, 5, 5);
 
 		for(var i = 1; i < DATA_COUNT; i++)
 			plotData[i] = 100 - memData[i].available * 100f / memData[i].total;
-		scoped plot("MEM", memColor, 5, 130);
+		plot("MEM", memColor, 5, 130);
 
 		for(var i = 1; i < DATA_COUNT; i++)
 			plotData[i] = 100 - memData[i].free * 100f / memData[i].total;
-		scoped plot("", cacheColor, 5, 130);
+		plot("", cacheColor, 5, 130);
+
+
+
+		scoped
+		{
+			cairo_move_to(cr, 130f, 5f);
+			var newsY = 0f;
+
+			for(var i = 0; i < 6; i++)
+			{
+				var layout = pango_cairo_create_layout(cr);
+				pango_layout_set_width(layout, pango_units_from_double(IMAGE_WIDTH - 140f));
+
+				if(i % 2 == 0)
+				{
+					newsY += 5;
+					pango_layout_set_font_description(layout, titleFont);
+					pango_layout_set_text(layout, news[i / 2].title, -1);
+				}
+				else
+				{
+					pango_layout_set_font_description(layout, textFont);
+					pango_layout_set_text(layout, news[i / 2].subtitle, -1);
+				}
+
+				cairo_move_to(cr, 130f, newsY);
+				pango_cairo_show_layout(cr, layout);
+
+				var height = 0;
+				pango_layout_get_pixel_size(layout, NULL, &height);
+				newsY += height;
+
+				g_object_unref(layout);
+			}
+		}
 
 
 
@@ -89,8 +130,8 @@ while(true)
 		fgets(uptime, 1024, proc);
 		pclose(proc);
 		*strchr!native(uptime, '\n') = 0;
-		cairo_select_font_face(cr, "sans-serif", 0, 1);
-		cairo_move_to(cr, 130.0, IMAGE_HEIGHT - 15.0);
+		cairo_select_font_face(cr, FONT_UPTIME, 0, 1);
+		cairo_move_to(cr, 130f, IMAGE_HEIGHT - 15f);
 		cairo_show_text(cr, uptime);
 
 
@@ -98,7 +139,15 @@ while(true)
 		cairo_surface_write_to_png(surface, "banner.png");
 		cairo_destroy(cr);
 		cairo_surface_destroy(surface);
+
 		i = 0;
+
+		j++;
+		if(j >= NEWS_REFRESH)
+		{
+			news.updateData();
+			j = 0;
+		}
 	}
 
 	sleep(1);

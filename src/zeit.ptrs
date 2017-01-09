@@ -1,0 +1,36 @@
+import HTTP from "../../PtrsStuff/libs/curl.ptrs";
+import json_encode, json_decode, json_destroy from "../../PtrsStuff/libs/json.ptrs";
+
+//obtain yours at http://developer.zeit.de/quickstart/
+const API_KEY = "YOUR API KEY HERE"; 
+
+if(API_KEY == NULL)
+	throw "No key for the zeit api set";
+
+struct ZeitNews
+{
+	data = null;
+
+	updateData(count = 3)
+	{
+		if(data)
+			json_destroy(data);
+
+		var req = HTTP.GET("http://api.zeit.de/content?fields=title%%2Csubtitle&limit=$count", map_stack {"X-Authorization": API_KEY});
+		if(req.code != 200)
+		{
+			var code = req.code;
+			delete req;
+			throw "Zeit API returned statis code ${req.code}";
+		}
+
+		data = json_decode(req.body);
+		delete req;
+	}
+
+	operator this[index]
+	{
+		index = cast<int>index;
+		return data.matches[index];
+	}
+};
