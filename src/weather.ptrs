@@ -1,0 +1,44 @@
+import HTTP from "../../PtrsStuff/libs/curl.ptrs";
+import json_encode, json_decode, json_destroy from "../../PtrsStuff/libs/json.ptrs";
+
+//obtain yours at http://openweathermap.org/
+const API_KEY = NULL;
+
+//obtain list of all city ids from http://bulk.openweathermap.org/sample/
+const LOCATION_ID = 0;
+
+if(API_KEY == NULL)
+	throw "No key for the openweatermap api set (see src/weather.ptrs)";
+var url = "http://api.openweathermap.org/data/2.5/weather?id=$LOCATION_ID&appid=$API_KEY";
+
+struct Weather
+{
+	private data = null;
+
+	get icon
+	{
+		return data.weather[0].icon;
+	}
+
+	get description
+	{
+		return data.weather[0].description;
+	}
+
+	updateData()
+	{
+		if(data)
+			json_destroy(data);
+
+		var req = HTTP.GET(url);
+		if(req.code != 200)
+		{
+			var code = req.code;
+			delete req;
+			throw "OpenWeatherMap API returned status code ${req.code}";
+		}
+
+		data = json_decode(req.body);
+		delete req;
+	}
+};

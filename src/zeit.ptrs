@@ -2,10 +2,10 @@ import HTTP from "../../PtrsStuff/libs/curl.ptrs";
 import json_encode, json_decode, json_destroy from "../../PtrsStuff/libs/json.ptrs";
 
 //obtain yours at http://developer.zeit.de/quickstart/
-const API_KEY = "YOUR API KEY HERE";
+const API_KEY = NULL;
 
 if(API_KEY == NULL)
-	throw "No key for the zeit api set";
+	throw "No key for the zeit api set (see src/zeit.ptrs)";
 
 struct ZeitNews
 {
