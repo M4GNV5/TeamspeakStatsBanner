@@ -1,6 +1,6 @@
 import sleep, popen, fgets, pclose, strchr, printf;
 import cairo_* from "libcairo.so.2";
-import g_object_unref, pango_* from "libpangocairo-1.0.so";
+import g_object_unref, pango_* from "libpangocairo-1.0.so.0";
 import CpuData from "./cpu.ptrs";
 import MemData from "./mem.ptrs";
 import ZeitNews from "./zeit.ptrs";
