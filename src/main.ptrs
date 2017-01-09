@@ -75,6 +75,11 @@ while(true)
 	{
 		surface = cairo_image_surface_create(0, IMAGE_WIDTH, IMAGE_HEIGHT);
 		cr = cairo_create(surface);
+
+		cairo_set_source_rgb(cr, 1f, 1f, 1f);
+		cairo_rectangle(cr, 0f, 0f, cast<float>IMAGE_WIDTH, cast<float>IMAGE_HEIGHT);
+		cairo_fill(cr);
+
 		cairo_select_font_face(cr, FONT_GRAPH, 0, 1);
 		cairo_set_font_size(cr, 15f);
 		cairo_set_line_width(cr, 3f);
